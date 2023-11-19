@@ -10,6 +10,17 @@
  * Copyright 2011-2022 Twitter, Inc.
  * Licensed under MIT (https://github.com/twbs/bootstrap/blob/main/LICENSE)
  */
+
+.ql-format-buttons {
+  display: flex; /* or inline-block */
+  margin-left: 15px;
+  margin-top: 20px;
+}
+
+.ql-format-buttons button {
+  margin-right: 5px; /* Adjust the spacing between buttons if needed */
+}
+
 :root {
   --bs-blue: #0d6efd;
   --bs-indigo: #6610f2;
