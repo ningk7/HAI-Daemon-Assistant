@@ -5,6 +5,35 @@ var quill = new Quill('#editor', {
     }
 });
 
+const gptGenerate = async(systemPrompt, message)=> {
+    try {
+      let response = await fetch('https://api.openai.com/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${'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'}`,
+        },
+        body: JSON.stringify({
+          model: 'gpt-3.5-turbo',
+          messages: [{ role: 'system', content: systemPrompt }, { role: 'user', content: message }],
+          temperature: 1.0,
+          top_p: 0.7,
+          n: 1,
+          stream: false,
+          presence_penalty: 0,
+          frequency_penalty: 0,
+        }),
+      })
+      if (!response.ok) { 
+        return undefined
+      }
+      const data = await response.json();
+      return data.choices[0].message.content;
+    } catch (error) {
+      return undefined;
+    }
+  }
+
 var highlighted_text; // stores highlighted text
 var end_index_ht; // stores end index of highlighted text
 quill.on('selection-change', function (range, oldRange, source) {
@@ -24,27 +53,6 @@ quill.on('text-change', function(delta, oldDelta, source) {
   console.log('Content changed:', fullText);
   end_index_ft = quill.getLength();
 });
-
-  const GPT_call = async(systemPrompt, message)=> {
-
-      const chat = await openai.createChatCompletion({
-      model: 'gpt-3.5-turbo-0613',
-      temperature: 0.8, 
-      messages: [
-          {
-          role: 'system',
-          content: systemPrompt,
-          },
-          ...chatHistory, 
-          {
-          role: 'user',
-          content: message, 
-          },
-      ]
-      });
-      let answer = chat.data.choices[0].message?.content;
-      return answer;
-  }
 
   // setting as let since we will overwrite later
   document.querySelector('#grammarRoverButton').addEventListener('click', function() {
