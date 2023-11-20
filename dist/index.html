@@ -85,7 +85,7 @@
             return answer;
         }
 
-            // setting as let since we will overwrite later
+        // setting as let since we will overwrite later
         document.querySelector('#grammarRoverButton').addEventListener('click', function() {
           let range = quill.getSelection(true);
           let aboutData;
@@ -111,7 +111,6 @@
                     console.log(xhr.statusText);
                 }
                 };
-        //   quill.insertText(range.index, response.data);
         });
         
         document.querySelector('#synthesizerButton').addEventListener('click', function() {
@@ -139,7 +138,6 @@
                     console.log(xhr.statusText);
                 }
                 };
-        //   quill.insertText(range.index, response.data);
         });
         
         document.querySelector('#elaboratorButton').addEventListener('click', function() {
@@ -167,7 +165,6 @@
                     console.log(xhr.statusText);
                 }
                 };
-        //   quill.insertText(range.index, response.data);
         });
         
         </script>
