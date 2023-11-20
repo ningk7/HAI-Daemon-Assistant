@@ -36,41 +36,31 @@ const gptGenerate = async(systemPrompt, message)=> {
     }
   }
 
-var highlighted_text; // stores highlighted text
-var end_index_ht; // stores end index of highlighted text
-quill.on('selection-change', function (range, oldRange, source) {
-    if (range && range.length > 0) {
-        highlighted_text = quill.getText(range.index, range.length);
-        end_index_ht = range.index + range.length;
-    } else {
-        // No text is currently highlighted
-        console.log('No highlighted text');
-    }
-    });
-
-var fullText = quill.getText(); // stores full text
-var end_index_ft = quill.getLength(); // sotres endIndex of full text
-quill.on('text-change', function(delta, oldDelta, source) {
-  fullText = quill.getText();
-  console.log('Content changed:', fullText);
-  end_index_ft = quill.getLength();
-});
-
-let grammarPrompt = `<SYS>I want you to act as an editor. You will be given a text. Your task is to identify grammar errors in the text. List the grammar errors and how to correct them, and also provide reasoning for the corrections. Each entry should be in the format (error|correction|reasoning).
-Example:
-Text: I have two childs. One is a girl named Clair. The other is boy named Thatcher.
-Corrections:
-(I have two childs.|I have two children.|The plural form of a child is children.)
-(The other is boy named Thatcher.|The other is a boy named Thatcher.|There needs to be an indefinite article to introduce the noun “boy.”)</SYS>`
-
 function setResponse(res) {
   document.getElementById("responseText").innerHTML = res;
 }
+
+let highlighted_text;
+quill.on('selection-change', function (range, oldRange, source) {
+    if (range && range.length > 0) {
+        highlighted_text = quill.getText(range.index, range.length);
+    } else {
+        // No text is currently highlighted
+        highlighted_text = null;
+        console.log('No highlighted text');
+    }
+    });
 
 async function generateGrammarResponse(text) {
     let user_text = `Text: ${text}
     Corrections:
     `
+    let grammarPrompt = `<SYS>I want you to act as an editor. You will be given a text. Your task is to identify grammar errors in the text. List the grammar errors and how to correct them, and also provide reasoning for the corrections. Each entry should be in the format (error|correction|reasoning).
+    Example:
+    Text: I have two childs. One is a girl named Clair. The other is boy named Thatcher.
+    Corrections:
+    (I have two childs.|I have two children.|The plural form of a child is children.)
+    (The other is boy named Thatcher.|The other is a boy named Thatcher.|There needs to be an indefinite article to introduce the noun “boy.”)</SYS>`
 
     let gptResponse = await gptGenerate(grammarPrompt, user_text);
     if (gptResponse === undefined) {
@@ -79,6 +69,7 @@ async function generateGrammarResponse(text) {
     if (gptResponse.search("No corrections needed") !== -1) {
         return gptResponse;
     }
+
     let responseList = gptResponse.split('(');
     let res = "";
     let numError = 1;
@@ -121,24 +112,29 @@ function generateSynthesizerResponse(text) {
   return "synthesizer";
 }
 
-function generateElaboratorResponse(text) {
-    let sys = 'Given a body of text, return a list of up to 5 items (a sentence each at most) that could be further expanded on:';
-    if (highlighted_text == null) { // If nothing is highlighted use full script as input
+async function generateElaboratorResponse(text) {
+    let sys = `Given this body of text, return a list of items (up to 5 at max) that could be further expanded followed by a brief reason. ONLY respond in this format: 
+    1. Text: ... Reason: ...
+    2. Text: ... Reason: ...`
+    
+    let user; 
+    if (highlighted_text == null) { 
         console.log("elaborating on full text");
-        let yourOwnText = gptGenerate(sys, text);
-        return yourOwnText;
-    } else { // else use highlighted
+        user = `Text: ${text}`
+    } else { 
         console.log("elaborating on highlighted text: " + highlighted_text);
-        let yourOwnText = gptGenerate(sys, highlighted_text);
-        return yourOwnText;
+        user = `Text: ${highlighted_text}`
     }
+    console.log(user);
+    let res = await gptGenerate(sys, user);
+    return res;
 }
 
 document.querySelector('#grammarRoverButton').addEventListener('click', async function() {
-    if (grammarPrompt === undefined) {
-        setResponse("Failed to fetch grammar prompt, try again.");
-        return;
-    }
+    // if (grammarPrompt === undefined) {
+    //     setResponse("Failed to fetch grammar prompt, try again.");
+    //     return;
+    // }
 
     setResponse("Loading...");
     let text = quill.getText();
@@ -165,10 +161,10 @@ document.querySelector('#synthesizerButton').addEventListener('click', function(
     setResponse(res);
 });
 
-document.querySelector('#elaboratorButton').addEventListener('click', function() {
+document.querySelector('#elaboratorButton').addEventListener('click', async function() {
     setResponse("Loading...");
     let text = quill.getText();
-    let res = generateElaboratorResponse(text); // write GPT calls in this function
+    let res = await generateElaboratorResponse(text); // write GPT calls in this function
     if (res === undefined) {
         setResponse("Failed to receive gpt response.");
         return;
