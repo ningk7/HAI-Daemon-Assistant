@@ -155,15 +155,20 @@ document.querySelector('#grammarRoverButton').addEventListener('click', async fu
 });
 
 document.querySelector('#synthesizerButton').addEventListener('click', function() {
+    setResponse("Loading...");
     let text = quill.getText();
-    let res = generateSynthesizerResponse(text);
+    let res = generateSynthesizerResponse(text); // write GPT calls in this function
+    if (res === undefined) {
+        setResponse("Failed to receive gpt response.");
+        return;
+    }
     setResponse(res);
 });
 
 document.querySelector('#elaboratorButton').addEventListener('click', function() {
     setResponse("Loading...");
     let text = quill.getText();
-    let res = generateElaboratorResponse(text);
+    let res = generateElaboratorResponse(text); // write GPT calls in this function
     if (res === undefined) {
         setResponse("Failed to receive gpt response.");
         return;
