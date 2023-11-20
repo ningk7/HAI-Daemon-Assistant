@@ -20,15 +20,10 @@
             <!-- Sidebar-->
             <div class="border-end bg-white" id="sidebar-wrapper">
                 <div class="sidebar-heading border-bottom bg-light">Daemon Writing Assistant</div>
-                <div id="toolbar" class="list-group list-group-flush">
+                <div class="list-group list-group-flush">
                     <button id="grammarRoverButton" class="list-group-item list-group-item-action list-group-item-light p-4" href="#!">GrammarRover</button>
                     <button id="synthesizerButton" class="list-group-item list-group-item-action list-group-item-light p-4" href="#!">Synthesizer</button>
                     <button id="elaboratorButton" class="list-group-item list-group-item-action list-group-item-light p-4" href="#!">Elaborator</button>
-                    <div class="ql-format-buttons">
-                        <button class="ql-bold">Bold</button>
-                        <button class="ql-italic">Italic</button>
-                        <button class="ql-underline">Underline</button>
-                    </div>
                 </div>
             </div>
             <!-- Page content wrapper-->
@@ -37,18 +32,14 @@
                 <nav class="navbar navbar-expand-lg navbar-light bg-light border-bottom">
                     <div class="container-fluid">
                         <button class="btn btn-primary" id="sidebarToggle">Toggle Menu</button>
-                        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation"><span class="navbar-toggler-icon"></span></button>
-                        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation"><span class="navbar-toggler-icon"></span></button>
-                        <!-- <div class="collapse navbar-collapse" id="navbarSupportedContent">
-                            <ul class="navbar-nav ms-auto mt-2 mt-lg-0">
-                                <li class="nav-item active"><button class="nav-link">Reset Text</button></li>
-                            </ul>
-                        </div> -->
                     </div>
                 </nav>
                 <!-- Page content-->
-                <div id="editor">
+                <div id="editor" style="height: 250px">
                     <!-- This is where Quill will place the editor's content -->
+                </div>
+                <div id="response">
+                    <pre id="responseText"></pre>
                 </div>
             </div>
         </div>
