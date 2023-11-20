@@ -54,49 +54,55 @@ quill.on('text-change', function(delta, oldDelta, source) {
   end_index_ft = quill.getLength();
 });
 
-let grammarPrompt = undefined;
-fetch("assets/grammar.txt")
-.then(response => response.text())
-.then(text => grammarPrompt = text);
+let grammarPrompt = `<SYS>I want you to act as an editor. You will be given a text. Your task is to identify grammar errors in the text. List the grammar errors and how to correct them, and also provide reasoning for the corrections. Each entry should be in the format (error|correction|reasoning).
+Example:
+Text: I have two childs. One is a girl named Clair. The other is boy named Thatcher.
+Corrections:
+(I have two childs.|I have two children.|The plural form of a child is children.)
+(The other is boy named Thatcher.|The other is a boy named Thatcher.|There needs to be an indefinite article to introduce the noun “boy.”)</SYS>`
 
 function setResponse(res) {
   document.getElementById("responseText").innerHTML = res;
 }
 
 async function generateGrammarResponse(text) {
-  let gptResponse = await gptGenerate(grammarPrompt, text);
-  if (gptResponse === undefined) {
-    return undefined;
-  }
-  if (gptResponse.search("No corrections needed") !== -1) {
-    return gptResponse;
-  }
-  let responseList = gptResponse.split('(');
-  let res = "";
-  let numError = 1;
-  responseList.forEach((response) => {
-    // remove closing parenthesis from response
-    response = response.substring(0, response.length - 1);
+    let user_text = `Text: ${text}
+    Corrections:
+    `
 
-    let parsedResponse = response.split('|');
-    if (parsedResponse.length < 3) {
-      return;
+    let gptResponse = await gptGenerate(grammarPrompt, user_text);
+    if (gptResponse === undefined) {
+        return undefined;
     }
+    if (gptResponse.search("No corrections needed") !== -1) {
+        return gptResponse;
+    }
+    let responseList = gptResponse.split('(');
+    let res = "";
+    let numError = 1;
+    responseList.forEach((response) => {
+        // remove closing parenthesis from response
+        response = response.substring(0, response.length - 1);
 
-    let initialSentence = parsedResponse[0];
-    let correctSentence = parsedResponse[1];
-    let reason = parsedResponse[2];
+        let parsedResponse = response.split('|');
+        if (parsedResponse.length < 3) {
+        return;
+        }
 
-    let sentenceInd = text.search(initialSentence);
-    if (sentenceInd === -1) {
-      return;
-    }
-    if (reason.search("No corrections needed") !== -1) {
-      return;
-    }
-    quill.formatText(sentenceInd, initialSentence.length, 'background', '#3399FF');
-    res += "[" + numError + "]\nError: " + initialSentence + "\nCorrection: " + correctSentence + "\nReason: " + reason + "\n--------------------\n";
-    numError += 1;
+        let initialSentence = parsedResponse[0];
+        let correctSentence = parsedResponse[1];
+        let reason = parsedResponse[2];
+
+        let sentenceInd = text.search(initialSentence);
+        if (sentenceInd === -1) {
+        return;
+        }
+        if (reason.search("No corrections needed") !== -1) {
+        return;
+        }
+        quill.formatText(sentenceInd, initialSentence.length, 'background', '#3399FF');
+        res += "[" + numError + "]\nError: " + initialSentence + "\nCorrection: " + correctSentence + "\nReason: " + reason + "\n--------------------\n";
+        numError += 1;
   })
 
   if (res === "") {
