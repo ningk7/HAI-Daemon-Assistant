@@ -11,7 +11,7 @@ const gptGenerate = async(systemPrompt, message)=> {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${'PASTE GPT KEY HERE'}`,
+          'Authorization': `Bearer ${'ADD GPT KEY HERE'}`,
         },
         body: JSON.stringify({
           model: 'gpt-3.5-turbo',
@@ -124,17 +124,13 @@ function generateSynthesizerResponse(text) {
 function generateElaboratorResponse(text) {
     let sys = 'Given a body of text, return a list of up to 5 items (a sentence each at most) that could be further expanded on:';
     if (highlighted_text == null) { // If nothing is highlighted use full script as input
+        console.log("elaborating on full text");
         let yourOwnText = gptGenerate(sys, text);
-        if (yourOwnText === undefined) {
-            return "Unable to Elaborate on Text";
-        }
-        return(end_index_ft, '\n' + yourOwnText);
+        return yourOwnText;
     } else { // else use highlighted
+        console.log("elaborating on highlighted text: " + highlighted_text);
         let yourOwnText = gptGenerate(sys, highlighted_text);
-        if (yourOwnText === undefined) {
-            return "Unable to Elaborate on Text";
-        }
-        return(end_index_ht, '\n' + yourOwnText);
+        return yourOwnText;
     }
 }
 
@@ -165,7 +161,12 @@ document.querySelector('#synthesizerButton').addEventListener('click', function(
 });
 
 document.querySelector('#elaboratorButton').addEventListener('click', function() {
+    setResponse("Loading...");
     let text = quill.getText();
     let res = generateElaboratorResponse(text);
+    if (res === undefined) {
+        setResponse("Failed to receive gpt response.");
+        return;
+    }
     setResponse(res);
 });
