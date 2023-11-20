@@ -25,12 +25,14 @@ const gptGenerate = async(systemPrompt, message)=> {
         }),
       })
       if (!response.ok) { 
+        console.log("Error in GPT call, response not okay")
         return undefined
       }
       const data = await response.json();
       return data.choices[0].message.content;
     } catch (error) {
-      return undefined;
+        console.log("Error in GPT call: " + error)
+        return undefined;
     }
   }
 
@@ -120,36 +122,50 @@ function generateSynthesizerResponse(text) {
 }
 
 function generateElaboratorResponse(text) {
-  return "elaborator";
+    let sys = 'Given a body of text, return a list of up to 5 items (a sentence each at most) that could be further expanded on:';
+    if (highlighted_text == null) { // If nothing is highlighted use full script as input
+        let yourOwnText = gptGenerate(sys, text);
+        if (yourOwnText === undefined) {
+            return "Unable to Elaborate on Text";
+        }
+        return(end_index_ft, '\n' + yourOwnText);
+    } else { // else use highlighted
+        let yourOwnText = gptGenerate(sys, highlighted_text);
+        if (yourOwnText === undefined) {
+            return "Unable to Elaborate on Text";
+        }
+        return(end_index_ht, '\n' + yourOwnText);
+    }
 }
-document.querySelector('#grammarRoverButton').addEventListener('click', async function() {
-  if (grammarPrompt === undefined) {
-    setResponse("Failed to fetch grammar prompt, try again.");
-    return;
-  }
 
-  setResponse("Loading...");
-  let text = quill.getText();
-  let res = await generateGrammarResponse(text);
-  if (res === undefined) {
-    setResponse("Failed to receive gpt response.");
-    return;
-  }
-  if (res.search("No corrections needed") !== -1) {
-    setResponse("No corrections needed");
-    return res;
-  }
-  setResponse(res);
+document.querySelector('#grammarRoverButton').addEventListener('click', async function() {
+    if (grammarPrompt === undefined) {
+        setResponse("Failed to fetch grammar prompt, try again.");
+        return;
+    }
+
+    setResponse("Loading...");
+    let text = quill.getText();
+    let res = await generateGrammarResponse(text);
+    if (res === undefined) {
+        setResponse("Failed to receive gpt response.");
+        return;
+    }
+    if (res.search("No corrections needed") !== -1) {
+        setResponse("No corrections needed");
+        return res;
+    }
+    setResponse(res);
 });
 
 document.querySelector('#synthesizerButton').addEventListener('click', function() {
-  let text = quill.getText();
-  let res = generateSynthesizerResponse(text);
-  setResponse(res);
+    let text = quill.getText();
+    let res = generateSynthesizerResponse(text);
+    setResponse(res);
 });
 
 document.querySelector('#elaboratorButton').addEventListener('click', function() {
-  let text = quill.getText();
-  let res = generateElaboratorResponse(text);
-  setResponse(res);
+    let text = quill.getText();
+    let res = generateElaboratorResponse(text);
+    setResponse(res);
 });
