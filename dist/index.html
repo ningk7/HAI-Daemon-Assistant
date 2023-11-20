@@ -64,7 +64,28 @@
             toolbar: '#toolbar'
           }
           });
-        
+          const call = async(systemPrompt, message)=> {
+
+            const chat = await openai.createChatCompletion({
+            model: 'gpt-3.5-turbo-0613',
+            temperature: 0.8, 
+            messages: [
+                {
+                role: 'system',
+                content: systemPrompt,
+                },
+                ...chatHistory, 
+                {
+                role: 'user',
+                content: message, 
+                },
+            ]
+            });
+            let answer = chat.data.choices[0].message?.content;
+            return answer;
+        }
+
+            // setting as let since we will overwrite later
         document.querySelector('#grammarRoverButton').addEventListener('click', function() {
           let range = quill.getSelection(true);
           let aboutData;
