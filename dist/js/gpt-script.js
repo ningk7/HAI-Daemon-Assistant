@@ -11,7 +11,7 @@ const gptGenerate = async(systemPrompt, message)=> {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${'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'}`,
+          'Authorization': `Bearer ${'PASTE GPT KEY HERE'}`,
         },
         body: JSON.stringify({
           model: 'gpt-3.5-turbo',
@@ -78,7 +78,6 @@ async function generateGrammarResponse(text) {
         return gptResponse;
     }
     let responseList = gptResponse.split('(');
-    console.log(responseList);
     let res = "";
     let numError = 1;
     responseList.forEach((response) => {
