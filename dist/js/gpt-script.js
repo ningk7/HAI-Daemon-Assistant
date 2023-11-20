@@ -1,9 +1,9 @@
 var quill = new Quill('#editor', {
     theme: 'snow',
-    modules: {
-      toolbar: '#toolbar'
+    "modules": {
+      "toolbar": false
     }
-  });
+});
 
 var highlighted_text; // stores highlighted text
 var end_index_ht; // stores end index of highlighted text
