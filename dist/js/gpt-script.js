@@ -78,6 +78,7 @@ async function generateGrammarResponse(text) {
         return gptResponse;
     }
     let responseList = gptResponse.split('(');
+    console.log(responseList);
     let res = "";
     let numError = 1;
     responseList.forEach((response) => {
@@ -86,19 +87,23 @@ async function generateGrammarResponse(text) {
 
         let parsedResponse = response.split('|');
         if (parsedResponse.length < 3) {
-        return;
+            console.log("Parsed Response doesn't contain all contents.");
+            return;
         }
 
         let initialSentence = parsedResponse[0];
         let correctSentence = parsedResponse[1];
         let reason = parsedResponse[2];
+        reason = reason.substring(0, reason.length - 1);
 
         let sentenceInd = text.search(initialSentence);
         if (sentenceInd === -1) {
-        return;
+            console.log("Cannot find initial sentence in input: " + initialSentence);
+            // return;
         }
         if (reason.search("No corrections needed") !== -1) {
-        return;
+            console.log("Reason states that there are no corrections needed for sentence.")
+            return;
         }
         quill.formatText(sentenceInd, initialSentence.length, 'background', '#3399FF');
         res += "[" + numError + "]\nError: " + initialSentence + "\nCorrection: " + correctSentence + "\nReason: " + reason + "\n--------------------\n";
