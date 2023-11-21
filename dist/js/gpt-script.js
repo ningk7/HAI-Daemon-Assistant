@@ -11,7 +11,7 @@ const gptGenerate = async(systemPrompt, message)=> {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${'ADD GPT KEY HERE'}`,
+          'Authorization': `Bearer ${'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'}`,
         },
         body: JSON.stringify({
           model: 'gpt-3.5-turbo',
@@ -108,8 +108,16 @@ async function generateGrammarResponse(text) {
   return res;
 }
 
-function generateSynthesizerResponse(text) {
-  return "synthesizer";
+async function generateSynthesizerResponse(text) {
+    const sys = `I want you to act as an editor. Given the body paragraphs below, first write me a 5 sentence introduction paragraph with a strong and detailed thesis statement. Then write me a 5 sentence conclusion paragraph. Respond in the format:
+    Introduction: 
+    ...
+    Conclusion: 
+    ...`
+    const body = `Body Paragraphs:
+    ${text}`
+    let res = await gptGenerate(sys, body);
+    return res;
 }
 
 async function generateElaboratorResponse(text) {
@@ -131,11 +139,6 @@ async function generateElaboratorResponse(text) {
 }
 
 document.querySelector('#grammarRoverButton').addEventListener('click', async function() {
-    // if (grammarPrompt === undefined) {
-    //     setResponse("Failed to fetch grammar prompt, try again.");
-    //     return;
-    // }
-
     setResponse("Loading...");
     let text = quill.getText();
     let res = await generateGrammarResponse(text);
@@ -150,10 +153,10 @@ document.querySelector('#grammarRoverButton').addEventListener('click', async fu
     setResponse(res);
 });
 
-document.querySelector('#synthesizerButton').addEventListener('click', function() {
+document.querySelector('#synthesizerButton').addEventListener('click', async function() {
     setResponse("Loading...");
     let text = quill.getText();
-    let res = generateSynthesizerResponse(text); // write GPT calls in this function
+    let res = await generateSynthesizerResponse(text); // write GPT calls in this function
     if (res === undefined) {
         setResponse("Failed to receive gpt response.");
         return;
