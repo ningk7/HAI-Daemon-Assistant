@@ -11,7 +11,7 @@ const gptGenerate = async(systemPrompt, message)=> {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${'2+2 = 4, minus one thats three quick maths'}`,
+          'Authorization': `Bearer ${'PUT API KEY HERE'}`,
         },
         body: JSON.stringify({
           model: 'gpt-3.5-turbo',
@@ -60,12 +60,12 @@ async function generateGrammarResponse(text) {
     let user_text = `Text: ${text}
     Corrections:
     `
-    let grammarPrompt = `<SYS>I want you to act as an editor. You will be given a text. Your task is to identify grammar errors in the text. List the grammar errors and how to correct them, and also provide reasoning for the corrections. Each entry should be in the format (error|correction|reasoning).
+    let grammarPrompt = `I want you to act as an editor. You will be given a text. Your task is to identify possible grammar errors in the text. List the grammar errors and how to correct them, and also provide reasoning for the corrections. Each entry should be in the format (error|correction|reasoning).
     Example:
     Text: I have two childs. One is a girl named Clair. The other is boy named Thatcher.
     Corrections:
     (I have two childs.|I have two children.|The plural form of a child is children.)
-    (The other is boy named Thatcher.|The other is a boy named Thatcher.|There needs to be an indefinite article to introduce the noun “boy.”)</SYS>`
+    (The other is boy named Thatcher.|The other is a boy named Thatcher.|There needs to be an indefinite article to introduce the noun “boy.”)`
 
     let gptResponse = await gptGenerate(grammarPrompt, user_text);
     if (gptResponse === undefined) {
@@ -93,10 +93,14 @@ async function generateGrammarResponse(text) {
         let reason = parsedResponse[2];
         reason = reason.substring(0, reason.length - 1);
 
+        if (initialSentence.toLowerCase() === correctSentence.toLowerCase()) {
+            console.log("No change to initial sentence.");
+            return;
+        }
+
         let sentenceInd = text.search(initialSentence);
         if (sentenceInd === -1) {
             console.log("Cannot find initial sentence in input: " + initialSentence);
-            // return;
         }
         if (reason.toLowerCase().search("No corrections needed") !== -1) {
             console.log("Reason states that there are no corrections needed for sentence.")
@@ -116,9 +120,11 @@ async function generateGrammarResponse(text) {
 async function generateSynthesizerResponse(text) {
     const sys = `I want you to act as an editor. Given the body paragraphs below, first write me a 5 sentence introduction paragraph with a strong and detailed thesis statement. Then write me a 5 sentence conclusion paragraph. For both the introduction and conclusion paragraphs, give me a list of key points you used from the body paragraphs. Respond in the format:
     Introduction: 
-    ...
+    [Generated Introduction]
+    * [List of key points from body paragraphs used in introduction]
     Conclusion: 
-    ...`
+    [Generated Conclusion]
+    * [List of key points from body paragraphs used in conclusion]`
     const body = `Body Paragraphs:
     ${text}`
     let res = await gptGenerate(sys, body);
