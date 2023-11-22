@@ -114,7 +114,7 @@ async function generateGrammarResponse(text) {
 }
 
 async function generateSynthesizerResponse(text) {
-    const sys = `I want you to act as an editor. Given the body paragraphs below, first write me a 5 sentence introduction paragraph with a strong and detailed thesis statement. Then write me a 5 sentence conclusion paragraph. Respond in the format:
+    const sys = `I want you to act as an editor. Given the body paragraphs below, first write me a 5 sentence introduction paragraph with a strong and detailed thesis statement. Then write me a 5 sentence conclusion paragraph. For both the introduction and conclusion paragraphs, give me a list of key points you used from the body paragraphs. Respond in the format:
     Introduction: 
     ...
     Conclusion: 
