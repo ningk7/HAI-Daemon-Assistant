@@ -24,6 +24,11 @@
                     <button id="grammarRoverButton" class="list-group-item list-group-item-action list-group-item-light p-4" href="#!">GrammarRover</button>
                     <button id="synthesizerButton" class="list-group-item list-group-item-action list-group-item-light p-4" href="#!">Synthesizer</button>
                     <button id="elaboratorButton" class="list-group-item list-group-item-action list-group-item-light p-4" href="#!">Elaborator</button>
+                    <form id="gpt-form" class="list-group-item list-group-item-action list-group-item-light p-4" onsubmit="return false;">
+                        <label for="userInput">Insert GPT API Key:</label>
+                        <input type="text" id="userInput"/>
+                        <input type="submit" onclick="storeGptKey();" />
+                    </form>
                 </div>
             </div>
             <!-- Page content wrapper-->

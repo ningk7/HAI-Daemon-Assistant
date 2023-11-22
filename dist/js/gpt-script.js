@@ -5,13 +5,15 @@ var quill = new Quill('#editor', {
     }
 });
 
+let gptKey = "";
+
 const gptGenerate = async(systemPrompt, message)=> {
     try {
       let response = await fetch('https://api.openai.com/v1/chat/completions', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${'PUT API KEY HERE'}`,
+          'Authorization': `Bearer ${gptKey}`,
         },
         body: JSON.stringify({
           model: 'gpt-3.5-turbo',
@@ -183,13 +185,19 @@ async function generateElaboratorResponse(text) {
     return res;
 }
 
+function storeGptKey() {
+    var input = document.getElementById("userInput").value;
+    gptKey = input;
+    alert("Added GPT Key!")
+}
+
 document.querySelector('#grammarRoverButton').addEventListener('click', async function() {
     setResponse("Loading...");
     resetHighlight();
     let text = quill.getText();
     let res = await generateGrammarResponse(text);
     if (res === undefined) {
-        setResponse("Failed to receive gpt response.");
+        setResponse("Failed to receive gpt response. You may need to insert a GPT key.");
         return;
     }
     if (res.toLowerCase().search("No corrections needed") !== -1) {
@@ -205,7 +213,7 @@ document.querySelector('#synthesizerButton').addEventListener('click', async fun
     let text = quill.getText();
     let res = await generateSynthesizerResponse(text); // write GPT calls in this function
     if (res === undefined) {
-        setResponse("Failed to receive gpt response.");
+        setResponse("Failed to receive gpt response. You may need to insert a GPT key.");
         return;
     }
     setResponse(res);
@@ -217,7 +225,7 @@ document.querySelector('#elaboratorButton').addEventListener('click', async func
     let text = quill.getText();
     let res = await generateElaboratorResponse(text);
     if (res === undefined) {
-        setResponse("Failed to receive gpt response.");
+        setResponse("Failed to receive gpt response. You may need to insert a GPT key.");
         return;
     }
     setResponse(res);
