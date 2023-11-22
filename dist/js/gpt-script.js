@@ -71,7 +71,7 @@ async function generateGrammarResponse(text) {
     if (gptResponse === undefined) {
         return undefined;
     }
-    if (gptResponse.search("No corrections needed") !== -1) {
+    if (gptResponse.toLowerCase().search("No corrections needed") !== -1) {
         return gptResponse;
     }
 
@@ -98,7 +98,7 @@ async function generateGrammarResponse(text) {
             console.log("Cannot find initial sentence in input: " + initialSentence);
             // return;
         }
-        if (reason.search("No corrections needed") !== -1) {
+        if (reason.toLowerCase().search("No corrections needed") !== -1) {
             console.log("Reason states that there are no corrections needed for sentence.")
             return;
         }
@@ -186,7 +186,7 @@ document.querySelector('#grammarRoverButton').addEventListener('click', async fu
         setResponse("Failed to receive gpt response.");
         return;
     }
-    if (res.search("No corrections needed") !== -1) {
+    if (res.toLowerCase().search("No corrections needed") !== -1) {
         setResponse("No corrections needed");
         return res;
     }
@@ -209,7 +209,7 @@ document.querySelector('#elaboratorButton').addEventListener('click', async func
     setResponse("Loading...");
     resetHighlight();
     let text = quill.getText();
-    let res = await generateElaboratorResponse(text); // write GPT calls in this function
+    let res = await generateElaboratorResponse(text);
     if (res === undefined) {
         setResponse("Failed to receive gpt response.");
         return;
