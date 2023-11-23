@@ -195,6 +195,10 @@ document.querySelector('#grammarRoverButton').addEventListener('click', async fu
     setResponse("Loading...");
     resetHighlight();
     let text = quill.getText();
+    if (text === '') {
+        setResponse("The textbook is empty, please add some text to use this function.");
+        return;
+    }
     let res = await generateGrammarResponse(text);
     if (res === undefined) {
         setResponse("Failed to receive gpt response. You may need to insert a GPT key.");
@@ -211,6 +215,10 @@ document.querySelector('#synthesizerButton').addEventListener('click', async fun
     setResponse("Loading...");
     resetHighlight();
     let text = quill.getText();
+    if (text === '') {
+        setResponse("The textbook is empty, please add some text to use this function.");
+        return;
+    }
     let res = await generateSynthesizerResponse(text); // write GPT calls in this function
     if (res === undefined) {
         setResponse("Failed to receive gpt response. You may need to insert a GPT key.");
@@ -222,6 +230,10 @@ document.querySelector('#synthesizerButton').addEventListener('click', async fun
 document.querySelector('#elaboratorButton').addEventListener('click', async function() {
     setResponse("Loading...");
     resetHighlight();
+    if (text === '') {
+        setResponse("The textbook is empty, please add some text to use this function.");
+        return;
+    }
     let text = quill.getText();
     let res = await generateElaboratorResponse(text);
     if (res === undefined) {
