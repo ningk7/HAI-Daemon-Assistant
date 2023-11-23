@@ -7,6 +7,7 @@ var quill = new Quill('#editor', {
 
 let gptKey = "";
 
+// Pass prompt to GPT-3.5 and generate response
 const gptGenerate = async(systemPrompt, message)=> {
     try {
       let response = await fetch('https://api.openai.com/v1/chat/completions', {
@@ -38,12 +39,14 @@ const gptGenerate = async(systemPrompt, message)=> {
     }
   }
 
+// Set reponse text
 function setResponse(res) {
   document.getElementById("responseText").innerHTML = res;
 }
 
+// Check for user-highlighted text
 let highlighted_text;
-quill.on('selection-change', function (range, oldRange, source) {
+quill.on('selection-change', function (range) {
     if (range && range.length > 0) {
         highlighted_text = quill.getText(range.index, range.length);
     } else {
@@ -58,6 +61,7 @@ function resetHighlight() {
     quill.formatText(0, text.length, 'background', '#FFFFFF');
 }
 
+// Finds grammar errors in user-inputted text and outputs fixes
 async function generateGrammarResponse(text) {
     let user_text = `Text: ${text}
     Corrections:
@@ -80,8 +84,9 @@ async function generateGrammarResponse(text) {
     let responseList = gptResponse.split('(');
     let res = "";
     let numError = 1;
+
+    // Format output for each grammar error found
     responseList.forEach((response) => {
-        // remove closing parenthesis from response
         response = response.substring(0, response.length - 1);
 
         let parsedResponse = response.split('|');
@@ -119,6 +124,7 @@ async function generateGrammarResponse(text) {
   return res;
 }
 
+// Generates introduction and conclusion paragraphs based on given text.
 async function generateSynthesizerResponse(text) {
     const sys = `I want you to act as an editor. Given the body paragraphs below, first write me a 5 sentence introduction paragraph with a strong and detailed thesis statement. Then write me a 5 sentence conclusion paragraph. For both the introduction and conclusion paragraphs, give me a list of key points you used from the body paragraphs. Respond in the format:
     Introduction: 
@@ -133,6 +139,7 @@ async function generateSynthesizerResponse(text) {
     return res;
 }
 
+// Finds areas that can be elaborated on in the user-inputted text
 async function generateElaboratorResponse(text) {
     let sys = `I want you give me writing advice. Given this body of text, return a list of items (up to 5 at max) that could be further expanded and give a short paragraph to explain why. Only output the list of entries, each entry should be in the format (text|reason). Make sure that 'text' is a string within the given body of text.
     Example:
@@ -148,7 +155,7 @@ async function generateElaboratorResponse(text) {
         console.log("elaborating on highlighted text: " + highlighted_text);
         user = `Text: ${highlighted_text}`
     }
-    console.log(user);
+
     // Reformatted to match consistency of other functions
     let res_gpt = await gptGenerate(sys, user);
     if (res_gpt === undefined) {
@@ -172,22 +179,17 @@ async function generateElaboratorResponse(text) {
         if (reason.substring(0, 7) === "Reason:") {
             reason = reason.substring(7, reason.length)
         }
-        let sentenceInd = text.search(initialSentence);
-        if (sentenceInd === -1) {
-            console.log("Cannot find initial sentence in input: " + initialSentence);
-            // return;
-        }
         if (reason.search("No corrections needed") !== -1) {
             console.log("Reason states that there are no corrections needed for sentence.")
             return;
         }
-        // quill.formatText(sentenceInd, initialSentence.length, 'background', '#99FF33');
         res += "[" + numError + "]\nTopic: " + initialSentence + "\nReason: " + reason + "\n--------------------\n";
         numError += 1;
     })
     return res;
 }
 
+// Stores user-inputted GPT API key
 function storeGptKey() {
     var input = document.getElementById("userInput").value;
     gptKey = input;
@@ -195,11 +197,11 @@ function storeGptKey() {
 }
 
 document.querySelector('#grammarRoverButton').addEventListener('click', async function() {
-    setResponse("Loading...");
+    setResponse("Loading..."); // let user know that GPT is running
     resetHighlight();
-    let text = quill.getText();
+    let text = quill.getText(); // get user input
     if (text === '') {
-        setResponse("The textbook is empty, please add some text to use this function.");
+        setResponse("The textbox is empty, please add some text to use this function.");
         return;
     }
     let res = await generateGrammarResponse(text);
@@ -215,14 +217,14 @@ document.querySelector('#grammarRoverButton').addEventListener('click', async fu
 });
 
 document.querySelector('#synthesizerButton').addEventListener('click', async function() {
-    setResponse("Loading...");
+    setResponse("Loading..."); // let user know that GPT is running
     resetHighlight();
-    let text = quill.getText();
+    let text = quill.getText(); // get user input
     if (text === '') {
-        setResponse("The textbook is empty, please add some text to use this function.");
+        setResponse("The textbox is empty, please add some text to use this function.");
         return;
     }
-    let res = await generateSynthesizerResponse(text); // write GPT calls in this function
+    let res = await generateSynthesizerResponse(text);
     if (res === undefined) {
         setResponse("Failed to receive gpt response. You may need to insert a GPT key.");
         return;
@@ -231,11 +233,11 @@ document.querySelector('#synthesizerButton').addEventListener('click', async fun
 });
 
 document.querySelector('#elaboratorButton').addEventListener('click', async function() {
-    setResponse("Loading...");
+    setResponse("Loading..."); // let user know that GPT is running
     resetHighlight();
-    let text = quill.getText();
+    let text = quill.getText(); // get user input
     if (text === '') {
-        setResponse("The textbook is empty, please add some text to use this function.");
+        setResponse("The textbox is empty, please add some text to use this function.");
         return;
     }
     let res = await generateElaboratorResponse(text);
