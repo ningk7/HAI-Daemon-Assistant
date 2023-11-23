@@ -151,6 +151,9 @@ async function generateElaboratorResponse(text) {
     console.log(user);
     // Reformatted to match consistency of other functions
     let res_gpt = await gptGenerate(sys, user);
+    if (res_gpt === undefined) {
+        return undefined;
+    }
     let responseList = res_gpt.split('(');
     let res = "";
     let numError = 1;
