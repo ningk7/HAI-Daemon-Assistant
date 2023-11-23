@@ -134,7 +134,7 @@ async function generateSynthesizerResponse(text) {
 }
 
 async function generateElaboratorResponse(text) {
-    let sys = `I want you give me writing advice. Given this body of text, return a list of items (up to 5 at max) that could be further expanded followed by a brief reason. Only output the list of entries, each entry should be in the format (text|reason). Make sure that 'text' is a string within the given body of text.
+    let sys = `I want you give me writing advice. Given this body of text, return a list of items (up to 5 at max) that could be further expanded and give a short paragraph to explain why. Only output the list of entries, each entry should be in the format (text|reason). Make sure that 'text' is a string within the given body of text.
     Example:
     Text: I really like cats. Dogs are amazing creatures. They are loyal and fun. They can be fluffly and cute too.
     Topics:
@@ -181,7 +181,7 @@ async function generateElaboratorResponse(text) {
             console.log("Reason states that there are no corrections needed for sentence.")
             return;
         }
-        quill.formatText(sentenceInd, initialSentence.length, 'background', '#99FF33');
+        // quill.formatText(sentenceInd, initialSentence.length, 'background', '#99FF33');
         res += "[" + numError + "]\nTopic: " + initialSentence + "\nReason: " + reason + "\n--------------------\n";
         numError += 1;
     })
