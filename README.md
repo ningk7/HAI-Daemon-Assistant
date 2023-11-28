@@ -2,6 +2,8 @@
 
 ## Group Members: Kathy Ning, Microl Chen, Harry Jeon
 
+## Deployed Website: [Link](https://hai-daemon-assistant.vercel.app)
+
 ## Basic Usage
 
 Code changes were only done in the `dist/index.html` and the `/dist/js/gpt-script.js` files. These are the only files you need to worry about, you can ignore everything else! To preview the changes made to the code, you can open the `index.html` file in your web browser.
