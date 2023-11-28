@@ -2,7 +2,7 @@
 
 ## Group Members: Kathy Ning, Microl Chen, Harry Jeon
 
-## Deployed Website: [Link](https://hai-daemon-assistant.vercel.app)
+## Deployed Website: [https://hai-daemon-assistant.vercel.app](https://hai-daemon-assistant.vercel.app)
 
 ## Basic Usage
 
