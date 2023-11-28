@@ -75,9 +75,11 @@ async function generateGrammarResponse(text) {
 
     let gptResponse = await gptGenerate(grammarPrompt, user_text);
     if (gptResponse === undefined) {
+        // error in gpt response
         return undefined;
     }
     if (gptResponse.toLowerCase().search("No corrections needed") !== -1) {
+        // no grammar corrections needed in input
         return gptResponse;
     }
 
