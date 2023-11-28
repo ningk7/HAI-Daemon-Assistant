@@ -143,11 +143,16 @@ async function generateSynthesizerResponse(text) {
 
 // Finds areas that can be elaborated on in the user-inputted text
 async function generateElaboratorResponse(text) {
-    let sys = `I want you give me writing advice. Given this body of text, return a list of items (up to 5 at max) that could be further expanded and give a short paragraph to explain why. Only output the list of entries, each entry should be in the format (text|reason). Make sure that 'text' is a string within the given body of text.
-    Example:
-    Text: I really like cats. Dogs are amazing creatures. They are loyal and fun. They can be fluffly and cute too.
+    let sys = `I want you to act as a proofreader and give me writing advice. Given this body of text, first understand the main idea of the text. Then, return a list of items (up to 5 at max) that could be further expanded on to support the text's main idea and give reasoning to explain why. Only output the list of entries, each entry should be in the format (text|reason). Make sure that 'text' is a string within the given body of text. If there is no elaboration needed, then return "No elaboration needed."
+    Example 1:
+    Text: I really like cats. However, dogs are also amazing creatures. They are loyal and fun. They can be fluffly and cute too.
     Topics:
-    (I really like cats.|You should expand a little bit about cats before talking about dogs here.)`
+    (I really like cats.|You don't provide any reasoning for this statement before talking about dogs. I suggest expanding more on why you like cats before moving to the topic of dogs.)
+    Example 2:
+    Text: I really like cats. However, dogs are also amazing creatures. They are loyal and fun. They can be fluffly and cute too.
+    Topics:
+    No elaboration needed.
+    `
 
     let user; 
     if (highlighted_text == null) { 
@@ -162,6 +167,10 @@ async function generateElaboratorResponse(text) {
     let res_gpt = await gptGenerate(sys, user);
     if (res_gpt === undefined) {
         return undefined;
+    }
+    if (res_gpt.toLowerCase().search("No elaboration needed") !== -1) {
+        // no elaborations needed in input
+        return '';
     }
     let responseList = res_gpt.split('(');
     let res = "";
@@ -185,6 +194,11 @@ async function generateElaboratorResponse(text) {
             console.log("Reason states that there are no corrections needed for sentence.")
             return;
         }
+        let sentenceInd = text.search(initialSentence);
+        if (sentenceInd === -1) {
+            console.log("Cannot find initial sentence in input: " + initialSentence);
+        }
+        quill.formatText(sentenceInd, initialSentence.length, 'background', '#3399FF');
         res += "[" + numError + "]\nTopic: " + initialSentence + "\nReason: " + reason + "\n--------------------\n";
         numError += 1;
     })
@@ -245,6 +259,10 @@ document.querySelector('#elaboratorButton').addEventListener('click', async func
     let res = await generateElaboratorResponse(text);
     if (res === undefined) {
         setResponse("Failed to receive gpt response. You may need to insert a GPT key.");
+        return;
+    }
+    if (res === '') {
+        setResponse("No suggestions for elaboration.");
         return;
     }
     setResponse(res);
