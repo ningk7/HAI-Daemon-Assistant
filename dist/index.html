@@ -21,9 +21,11 @@
             <div class="border-end bg-white" id="sidebar-wrapper">
                 <div class="sidebar-heading border-bottom bg-light">Daemon Writing Assistant</div>
                 <div class="list-group list-group-flush">
+                    <!-- Daemons-->
                     <button id="grammarRoverButton" class="list-group-item list-group-item-action list-group-item-light p-4" href="#!">GrammarRover</button>
                     <button id="synthesizerButton" class="list-group-item list-group-item-action list-group-item-light p-4" href="#!">Synthesizer</button>
                     <button id="elaboratorButton" class="list-group-item list-group-item-action list-group-item-light p-4" href="#!">Elaborator</button>
+                    <!-- GPT Key Submission Box-->
                     <form id="gpt-form" class="list-group-item list-group-item-action list-group-item-light p-4" onsubmit="return false;">
                         <label for="userInput">Insert GPT API Key:</label>
                         <input type="text" id="userInput"/>
@@ -31,9 +33,7 @@
                     </form>
                 </div>
             </div>
-            <!-- Page content wrapper-->
             <div id="page-content-wrapper">
-                <!-- Top navigation-->
                 <nav class="navbar navbar-expand-lg navbar-light bg-light border-bottom">
                     <div class="container-fluid">
                         <button class="btn btn-primary" id="sidebarToggle">Toggle Menu</button>
@@ -41,9 +41,10 @@
                 </nav>
                 <!-- Page content-->
                 <div id="editor" style="height: 250px">
-                    <!-- This is where Quill will place the editor's content -->
+                    <!-- This is where Quill will read the content-->
                 </div>
                 <div id="response">
+                    <!-- This is where Quill will place the response from GPT. Default instructions given below-->
                     <pre id="responseText" style="white-space: pre-wrap;">1. Please enter and submit the GPT API key in the designated box to the left.
 
 2. Enter your text in the textbox above.
