@@ -44,6 +44,26 @@ function setResponse(res) {
   document.getElementById("responseText").innerHTML = res;
 }
 
+// Add each grammar correction to output
+function addGrammarCorrection(text, index) {
+    document.getElementById("responseText").innerHTML += text;
+
+    // add correction button 
+    const button = document.createElement('button')
+    button.innerText = 'Add Correction ' + (index+1)
+
+    button.addEventListener('click', () => {
+        // correctGrammarInput(index)
+        alert("Button clicked!")
+    })
+
+    button.id = index
+    document.getElementById("responseText").appendChild(button)
+
+    // Add spacer between responses
+    document.getElementById("responseText").innerHTML += "\n--------------------\n";
+}
+
 // Check for user-highlighted text
 let highlighted_text;
 let end_index;
@@ -55,7 +75,6 @@ quill.on('selection-change', function (range) {
     } else {
         // No text is currently highlighted
         highlighted_text = null;
-        console.log('No highlighted text');
     }
     });
 
@@ -67,7 +86,8 @@ function resetHighlight() {
 // Replace sentence with the grammatically correct sentence
 let corrected_text = new Array();
 let replaced_text = new Array();
-function correct_grammar_specific(index) {
+function correctGrammarInput(index) {
+    console.log("Here at index " + index)
     let initialSentence = corrected_text[index];
     let correctSentence = replaced_text[index];
 
@@ -119,7 +139,7 @@ async function generateGrammarResponse(text) {
     }
 
     let responseList = gptResponse.split('(');
-    let res = "";
+    let res = [];
     let numError = 1;
 
     // Format output for each grammar error found
@@ -134,7 +154,7 @@ async function generateGrammarResponse(text) {
 
         let initialSentence = parsedResponse[0];
         let correctSentence = parsedResponse[1];
-        let reason = parsedResponse[2];
+        let reason = parsedResponse[2].trim();
         reason = reason.substring(0, reason.length - 1);
 
         if (initialSentence.toLowerCase() === correctSentence.toLowerCase()) {
@@ -153,12 +173,12 @@ async function generateGrammarResponse(text) {
         corrected_text.push(initialSentence);
         replaced_text.push(correctSentence);
         quill.formatText(sentenceInd, initialSentence.length, 'background', '#3399FF');
-        res += "[" + numError + "]\nError: " + initialSentence + "\nCorrection: " + correctSentence + "\nReason: " + reason + "\n--------------------\n";
+        res.push("[" + numError + "]\nError: " + initialSentence + "\nCorrection: " + correctSentence + "\nReason: " + reason + "\n");
         numError += 1;
   })
 
-  if (res === "") {
-    return "No corrections needed";
+  if (res.length === 0) {
+    return ["No corrections needed"];
   }
   return res;
 }
@@ -246,7 +266,7 @@ async function generateElaboratorResponse(text) {
 function storeGptKey() {
     var input = document.getElementById("userInput").value;
     if (input === '') {
-        alert("No GPT Key Added in Input.");
+        alert("ERROR: No GPT Key Added in Input.");
     } else {
         gptKey = input;
         alert("Added GPT Key!");
@@ -266,20 +286,17 @@ document.querySelector('#grammarRoverButton').addEventListener('click', async fu
         setResponse("Failed to receive gpt response. You may need to insert a GPT key.");
         return;
     }
-    if (res.toLowerCase().search("No corrections needed") !== -1) {
+    if (res[0].search("No corrections needed") !== -1) {
         setResponse("No corrections needed");
-        return res;
+        return;
     }
-    setResponse(res);
-    const button = document.createElement('button')
-    // Set the button text to 'Can you click me?'
-    button.innerText = 'Add All Corrections'
 
-    // Attach the "click" event to your button
-    button.addEventListener('click', correct_grammar_specific(0))
+    setResponse('');
 
-    button.id = 1
-    document.getElementById("responseText").appendChild(button)
+    // Iterate through res array, appending each grammar correction to responseText
+    for (let i = 0; i < res.length; i++) {
+        addGrammarCorrection(res[i], i);
+    }
 });
 
 document.querySelector('#synthesizerButton').addEventListener('click', async function() {
