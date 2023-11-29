@@ -39,7 +39,7 @@ const gptGenerate = async(systemPrompt, message)=> {
     }
   }
 
-// Set reponse text
+// Replace response text
 function setResponse(res) {
   document.getElementById("responseText").innerHTML = res;
 }
@@ -64,9 +64,9 @@ function resetHighlight() {
     quill.formatText(0, text.length, 'background', '#FFFFFF');
 }
 
+// Replace sentence with the grammatically correct sentence
 let corrected_text = new Array();
 let replaced_text = new Array();
-// Replace each input sentence with the corrected sentence.
 function correct_grammar_specific(index) {
     let initialSentence = corrected_text[index];
     let correctSentence = replaced_text[index];
@@ -74,7 +74,7 @@ function correct_grammar_specific(index) {
     let index_quill = quill.getText().indexOf(initialSentence);
 
     if (index_quill === -1) {
-        console.log("Cannot find initial sentence in input: " + initialSentence);
+        alert("ERROR: Couldn't find sentence in input. Please manually correct this sentence.");
     } else {
         // Delete the initial sentence
         quill.deleteText(index_quill, initialSentence.length, 'user');
