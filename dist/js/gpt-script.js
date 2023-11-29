@@ -47,8 +47,6 @@ function setResponse(res) {
 // Check for user-highlighted text
 let highlighted_text;
 let end_index;
-let corrected_text = new Array();
-let replaced_text = new Array();
 
 quill.on('selection-change', function (range) {
     if (range && range.length > 0) {
@@ -66,6 +64,9 @@ function resetHighlight() {
     quill.formatText(0, text.length, 'background', '#FFFFFF');
 }
 
+let corrected_text = new Array();
+let replaced_text = new Array();
+// Replace each input sentence with the corrected sentence.
 function correct_grammar_specific(index) {
     let initialSentence = corrected_text[index];
     let correctSentence = replaced_text[index];
@@ -244,8 +245,12 @@ async function generateElaboratorResponse(text) {
 // Stores user-inputted GPT API key
 function storeGptKey() {
     var input = document.getElementById("userInput").value;
-    gptKey = input;
-    alert("Added GPT Key!")
+    if (input === '') {
+        alert("No GPT Key Added in Input.");
+    } else {
+        gptKey = input;
+        alert("Added GPT Key!");
+    }
 }
 
 document.querySelector('#grammarRoverButton').addEventListener('click', async function() {
@@ -266,6 +271,15 @@ document.querySelector('#grammarRoverButton').addEventListener('click', async fu
         return res;
     }
     setResponse(res);
+    const button = document.createElement('button')
+    // Set the button text to 'Can you click me?'
+    button.innerText = 'Add All Corrections'
+
+    // Attach the "click" event to your button
+    button.addEventListener('click', correct_grammar_specific(0))
+
+    button.id = 1
+    document.getElementById("responseText").appendChild(button)
 });
 
 document.querySelector('#synthesizerButton').addEventListener('click', async function() {
