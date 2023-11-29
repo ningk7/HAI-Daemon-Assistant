@@ -63,9 +63,19 @@ function resetHighlight() {
 
 // Finds grammar errors in user-inputted text and outputs fixes
 async function generateGrammarResponse(text) {
-    let user_text = `Text: ${text}
+    let choose_text; 
+    if (highlighted_text == null) { 
+        console.log("checking grammar on full text");
+        choose_text = text
+    } else { 
+        console.log("checking grammar on highlighted text");
+        choose_text = highlighted_text
+    }
+
+    let user_text = `Text: ${choose_text}
     Corrections:
     `
+
     let grammarPrompt = `I want you to act as an editor. You will be given a text. Your task is to identify possible grammar errors in the text. List the grammar errors and how to correct them, and also provide reasoning for the corrections. Each entry should be in the format (error|correction|reasoning).
     Example:
     Text: I have two childs. One is a girl named Clair. The other is boy named Thatcher.
