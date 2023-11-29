@@ -46,9 +46,14 @@ function setResponse(res) {
 
 // Check for user-highlighted text
 let highlighted_text;
+let end_index;
+let corrected_text = new Array();
+let replaced_text = new Array();
+
 quill.on('selection-change', function (range) {
     if (range && range.length > 0) {
         highlighted_text = quill.getText(range.index, range.length);
+        end_index_ht = range.index + range.length;
     } else {
         // No text is currently highlighted
         highlighted_text = null;
@@ -61,8 +66,27 @@ function resetHighlight() {
     quill.formatText(0, text.length, 'background', '#FFFFFF');
 }
 
+function correct_grammar_specific(index) {
+    let initialSentence = corrected_text(index);
+    let correctSentence = replaced_text(index);
+
+    let index_quill = quill.getText().indexOf(initialSentence);
+
+    if (index_quill === -1) {
+        console.log("Cannot find initial sentence in input: " + initialSentence);
+    } else {
+        // Delete the initial sentence
+        quill.deleteText(index_quill, initialSentence.length, 'user');
+
+        // Insert the correct sentence in its place
+        quill.insertText(index_quill, correctSentence, 'user');
+    }
+}
+
 // Finds grammar errors in user-inputted text and outputs fixes
 async function generateGrammarResponse(text) {
+    corrected_text = [];
+    replaced_text = [];
     let choose_text; 
     if (highlighted_text == null) { 
         console.log("checking grammar on full text");
@@ -125,6 +149,8 @@ async function generateGrammarResponse(text) {
             console.log("Reason states that there are no corrections needed for sentence.")
             return;
         }
+        corrected_text.push(initialSentence);
+        replaced_text.push(correctSentence);
         quill.formatText(sentenceInd, initialSentence.length, 'background', '#3399FF');
         res += "[" + numError + "]\nError: " + initialSentence + "\nCorrection: " + correctSentence + "\nReason: " + reason + "\n--------------------\n";
         numError += 1;
