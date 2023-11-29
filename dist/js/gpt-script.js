@@ -67,8 +67,8 @@ function resetHighlight() {
 }
 
 function correct_grammar_specific(index) {
-    let initialSentence = corrected_text(index);
-    let correctSentence = replaced_text(index);
+    let initialSentence = corrected_text[index];
+    let correctSentence = replaced_text[index];
 
     let index_quill = quill.getText().indexOf(initialSentence);
 
