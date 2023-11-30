@@ -117,15 +117,21 @@ function resetHighlight() {
 
 // Finds grammar errors in user-inputted text and outputs fixes
 async function generateGrammarResponse(text) {
+
     corrected_text = [];
     replaced_text = [];
+
     let choose_text; 
+    // check for user highlighted text
     if (highlighted_text == null) { 
         console.log("checking grammar on full text");
         choose_text = text
-    } else { 
+    } else if (text.search(highlighted_text) === -1){ 
+        console.log("incorrect highlight - checking grammar on full text");
+        choose_text = text;
+    } else {
         console.log("checking grammar on highlighted text");
-        choose_text = highlighted_text
+        choose_text = highlighted_text;
     }
 
     let user_text = `Text: ${choose_text}
@@ -208,6 +214,10 @@ async function generateSynthesizerResponse(text) {
     const body = `Body Paragraphs:
     ${text}`
     let res = await gptGenerate(sys, body);
+    if (res === undefined) {
+        // error in gpt response
+        return undefined;
+    }
     return res;
 }
 
@@ -225,10 +235,15 @@ async function generateElaboratorResponse(text) {
     `
 
     let user; 
+    // check for user highlighted text
     if (highlighted_text == null) { 
-        user = `Text: ${text}`
-    } else { 
-        user = `Text: ${highlighted_text}`
+        console.log("elaborating on full text");
+        user = `Text: ${text}`;
+    } else if (text.search(highlighted_text) === -1){
+        console.log("error in highlight - elaborating on full text");
+        user = `Text: ${text}`;
+    } else {
+        user = `Text: ${highlighted_text}`;
     }
 
     // Reformatted to match consistency of other functions
@@ -244,6 +259,7 @@ async function generateElaboratorResponse(text) {
     let res = "";
     let numError = 1;
 
+    // Format output for each elaboration found
     responseList.forEach((response) => {
         // remove closing parenthesis from response
         response = response.substring(0, response.length - 1);
