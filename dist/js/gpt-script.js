@@ -76,7 +76,6 @@ function addGrammarButtonListeners(num) {
 let corrected_text = new Array();
 let replaced_text = new Array();
 function correctGrammarInput(index) {
-    console.log("Here at index " + index)
     let initialSentence = corrected_text[index];
     let correctSentence = replaced_text[index];
 
@@ -138,7 +137,7 @@ async function generateGrammarResponse(text) {
     Corrections:
     `
 
-    let grammarPrompt = `I want you to act as an editor. You will be given a text. Your task is to identify possible grammar errors in the text. List the grammar errors and how to correct them, and also provide reasoning for the corrections. Each entry should be in the format (error|correction|reasoning).
+    let grammarPrompt = `I want you to act as an editor. You will be given a text. Your task is to identify all possible grammar errors in the text. List the grammar errors and how to correct them, and also provide reasoning for the corrections. Each entry should be in the format (error|correction|reasoning).
     Example:
     Text: I have two childs. One is a girl named Clair. The other is boy named Thatcher.
     Corrections:
@@ -184,6 +183,7 @@ async function generateGrammarResponse(text) {
             return;
         } 
 
+        let current_res = "[" + numError + "]\nError: " + initialSentence + "\nCorrection: " + correctSentence + "\nReason: " + reason + "\n";
         let sentenceInd = -1;
         try {
             sentenceInd = text.search(initialSentence);
@@ -192,13 +192,14 @@ async function generateGrammarResponse(text) {
         }
         if (sentenceInd === -1) {
             console.log("Cannot find initial sentence in input: " + initialSentence);
+            current_res += "**This grammar correction is not highlighted in the input text above**\n";
         } else {
             quill.formatText(sentenceInd, initialSentence.length, 'background', '#3399FF');
         }
 
         corrected_text.push(initialSentence);
         replaced_text.push(correctSentence);
-        res.push("[" + numError + "]\nError: " + initialSentence + "\nCorrection: " + correctSentence + "\nReason: " + reason + "\n");
+        res.push(current_res);
         numError += 1;
   })
 
@@ -283,18 +284,20 @@ async function generateElaboratorResponse(text) {
             return;
         }
 
+        res += "[" + numError + "]\nTopic: " + initialSentence + "\nReason: " + reason + "\n";
         let sentenceInd = -1;
         try {
             sentenceInd = text.toLowerCase().search(initialSentence.toLowerCase());
         } catch(error) {
-            console.log("Error in finding initial sentence in input: " + initialSentence.toLowerCase());
+            console.log("Error in finding initial sentence in input.");
         }
         if (sentenceInd === -1) {
             console.log("Cannot find initial sentence in input: " + initialSentence.toLowerCase());
+            res += "**This topic is not highlighted in the input text above**\n";
         } else {
             quill.formatText(sentenceInd, initialSentence.length, 'background', '#3399FF');
         }
-        res += "[" + numError + "]\nTopic: " + initialSentence + "\nReason: " + reason + "\n--------------------\n";
+        res += "--------------------\n";
         numError += 1;
     })
     return res;
