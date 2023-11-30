@@ -5,6 +5,7 @@
 ## Deployed Website: [https://hai-daemon-assistant.vercel.app](https://hai-daemon-assistant.vercel.app)
 
 ## User Trust: [Slide Deck](https://docs.google.com/presentation/d/1sMaC5hp3DbTkcZ3Liu3pyQayfnYOQ5O9yW_cI6c2lKo/edit?usp=sharing)
+In-Depth Interview Notes: [Link](https://docs.google.com/document/d/1zb6RG5iX2--QAeSC0GGqJ0JabR55vvnENJiyZY7nAss/edit?usp=sharing)
 
 ## Basic Usage
 
