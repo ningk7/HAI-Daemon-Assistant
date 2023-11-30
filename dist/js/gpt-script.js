@@ -52,34 +52,20 @@ function addGrammarCorrection(text, index) {
     const button = document.createElement('button')
     button.innerText = 'Add Correction ' + (index+1)
 
-    button.addEventListener('click', () => {
-        // correctGrammarInput(index)
-        alert("Button clicked!")
-    })
-
-    button.id = index
+    button.id = "butt" + index
     document.getElementById("responseText").appendChild(button)
 
     // Add spacer between responses
     document.getElementById("responseText").innerHTML += "\n--------------------\n";
 }
 
-// Check for user-highlighted text
-let highlighted_text;
-let end_index;
-
-quill.on('selection-change', function (range) {
-    if (range && range.length > 0) {
-        highlighted_text = quill.getText(range.index, range.length);
-    } else {
-        // No text is currently highlighted
-        highlighted_text = null;
+// Add click events to buttons to allow grammar corrections on input text
+function addGrammarButtonListeners(num) {
+    for (let i = 0; i < num; i++) {
+        document.getElementById("butt" + i).addEventListener('click', () => {
+            correctGrammarInput(i)
+        })
     }
-    });
-
-function resetHighlight() {
-    let text = quill.getText();
-    quill.formatText(0, text.length, 'background', '#FFFFFF');
 }
 
 // Replace sentence with the grammatically correct sentence
@@ -101,6 +87,25 @@ function correctGrammarInput(index) {
         // Insert the correct sentence in its place
         quill.insertText(index_quill, correctSentence, 'user');
     }
+}
+
+// Check for user-highlighted text
+let highlighted_text;
+let end_index;
+
+quill.on('selection-change', function (range) {
+    if (range && range.length > 0) {
+        highlighted_text = quill.getText(range.index, range.length);
+        end_index_ht = range.index + range.length;
+    } else {
+        // No text is currently highlighted
+        highlighted_text = null;
+    }
+    });
+
+function resetHighlight() {
+    let text = quill.getText();
+    quill.formatText(0, text.length, 'background', '#FFFFFF');
 }
 
 // Finds grammar errors in user-inputted text and outputs fixes
@@ -296,6 +301,7 @@ document.querySelector('#grammarRoverButton').addEventListener('click', async fu
     for (let i = 0; i < res.length; i++) {
         addGrammarCorrection(res[i], i);
     }
+    addGrammarButtonListeners(res.length);
 });
 
 document.querySelector('#synthesizerButton').addEventListener('click', async function() {
