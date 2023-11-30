@@ -62,8 +62,12 @@ function addGrammarCorrection(text, index) {
 // Add click events to buttons to allow grammar corrections on input text
 function addGrammarButtonListeners(num) {
     for (let i = 0; i < num; i++) {
-        document.getElementById("butt" + i).addEventListener('click', () => {
-            correctGrammarInput(i)
+        const button = document.getElementById("butt" + i);
+        button.addEventListener('click', () => {
+            let success = correctGrammarInput(i);
+            if (success) {
+                button.remove();
+            }
         })
     }
 }
@@ -80,12 +84,15 @@ function correctGrammarInput(index) {
 
     if (index_quill === -1) {
         alert("ERROR: Couldn't find sentence in input. Please manually correct this sentence.");
+        return false;
     } else {
         // Delete the initial sentence
         quill.deleteText(index_quill, initialSentence.length, 'user');
 
         // Insert the correct sentence in its place
         quill.insertText(index_quill, correctSentence, 'user');
+
+        return true
     }
 }
 
