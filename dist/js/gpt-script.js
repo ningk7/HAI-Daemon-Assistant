@@ -173,17 +173,19 @@ async function generateGrammarResponse(text) {
             return;
         }
 
-        let sentenceInd = text.search(initialSentence);
-        if (sentenceInd === -1) {
-            console.log("Cannot find initial sentence in input: " + initialSentence);
-        }
         if (reason.toLowerCase().search("No corrections needed") !== -1) {
             console.log("Reason states that there are no corrections needed for sentence.")
             return;
+        } 
+
+        let sentenceInd = text.search(initialSentence);
+        if (sentenceInd === -1) {
+            console.log("Cannot find initial sentence in input: " + initialSentence);
+        } else {
+            quill.formatText(sentenceInd, initialSentence.length, 'background', '#3399FF');
         }
         corrected_text.push(initialSentence);
         replaced_text.push(correctSentence);
-        quill.formatText(sentenceInd, initialSentence.length, 'background', '#3399FF');
         res.push("[" + numError + "]\nError: " + initialSentence + "\nCorrection: " + correctSentence + "\nReason: " + reason + "\n");
         numError += 1;
   })
@@ -224,10 +226,8 @@ async function generateElaboratorResponse(text) {
 
     let user; 
     if (highlighted_text == null) { 
-        console.log("elaborating on full text");
         user = `Text: ${text}`
     } else { 
-        console.log("elaborating on highlighted text: " + highlighted_text);
         user = `Text: ${highlighted_text}`
     }
 
@@ -253,20 +253,20 @@ async function generateElaboratorResponse(text) {
             return;
         }
         let initialSentence = parsedResponse[0];
-        let reason = parsedResponse[1];
+        let reason = parsedResponse[1].trim();
         reason = reason.substring(0, reason.length - 1);
-        if (reason.substring(0, 7) === "Reason:") {
-            reason = reason.substring(7, reason.length)
-        }
-        if (reason.search("No corrections needed") !== -1) {
+
+        if (reason.toLowerCase().search("No elaboration needed.") !== -1) {
             console.log("Reason states that there are no corrections needed for sentence.")
             return;
         }
-        let sentenceInd = text.search(initialSentence);
+
+        let sentenceInd = text.toLowerCase().search(initialSentence.toLowerCase());
         if (sentenceInd === -1) {
-            console.log("Cannot find initial sentence in input: " + initialSentence);
+            console.log("Cannot find initial sentence in input: " + initialSentence.toLowerCase());
+        } else {
+            quill.formatText(sentenceInd, initialSentence.length, 'background', '#3399FF');
         }
-        quill.formatText(sentenceInd, initialSentence.length, 'background', '#3399FF');
         res += "[" + numError + "]\nTopic: " + initialSentence + "\nReason: " + reason + "\n--------------------\n";
         numError += 1;
     })
