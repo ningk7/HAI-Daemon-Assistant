@@ -71,7 +71,6 @@ let end_index;
 quill.on('selection-change', function (range) {
     if (range && range.length > 0) {
         highlighted_text = quill.getText(range.index, range.length);
-        end_index_ht = range.index + range.length;
     } else {
         // No text is currently highlighted
         highlighted_text = null;
