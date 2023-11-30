@@ -184,12 +184,18 @@ async function generateGrammarResponse(text) {
             return;
         } 
 
-        let sentenceInd = text.search(initialSentence);
+        let sentenceInd = -1;
+        try {
+            sentenceInd = text.search(initialSentence);
+        } catch(error) {
+            console.log("Error in finding initial sentence in input: " + initialSentence);
+        }
         if (sentenceInd === -1) {
             console.log("Cannot find initial sentence in input: " + initialSentence);
         } else {
             quill.formatText(sentenceInd, initialSentence.length, 'background', '#3399FF');
         }
+
         corrected_text.push(initialSentence);
         replaced_text.push(correctSentence);
         res.push("[" + numError + "]\nError: " + initialSentence + "\nCorrection: " + correctSentence + "\nReason: " + reason + "\n");
@@ -277,7 +283,12 @@ async function generateElaboratorResponse(text) {
             return;
         }
 
-        let sentenceInd = text.toLowerCase().search(initialSentence.toLowerCase());
+        let sentenceInd = -1;
+        try {
+            sentenceInd = text.toLowerCase().search(initialSentence.toLowerCase());
+        } catch(error) {
+            console.log("Error in finding initial sentence in input: " + initialSentence.toLowerCase());
+        }
         if (sentenceInd === -1) {
             console.log("Cannot find initial sentence in input: " + initialSentence.toLowerCase());
         } else {
