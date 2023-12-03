@@ -7,6 +7,17 @@ var quill = new Quill('#editor', {
 
 let gptKey = "";
 
+// Stores user-inputted GPT API key
+function storeGptKey() {
+    var input = document.getElementById("userInput").value;
+    if (input === '') {
+        alert("ERROR: No GPT Key Added in Input.");
+    } else {
+        gptKey = input;
+        alert("Added GPT Key!");
+    }
+}
+
 // Pass prompt to GPT-3.5 and generate response
 const gptGenerate = async(systemPrompt, message)=> {
     try {
@@ -44,16 +55,18 @@ function setResponse(res) {
   document.getElementById("responseText").innerHTML = res;
 }
 
-// Add each grammar correction to output
+// Add each grammar correction to response box
 function addGrammarCorrection(text, index) {
     document.getElementById("responseText").innerHTML += text;
 
-    // add correction button 
-    const button = document.createElement('button')
-    button.innerText = 'Add Correction ' + (index+1)
+    // Only add correction button if can find initial text in input
+    if (text.indexOf("**This grammar correction is not highlighted in the input text above**") === -1) {
+        const button = document.createElement('button')
+        button.innerText = 'Add Correction ' + (index+1)
 
-    button.id = "butt" + index
-    document.getElementById("responseText").appendChild(button)
+        button.id = "butt" + index
+        document.getElementById("responseText").appendChild(button)
+    }
 
     // Add spacer between responses
     document.getElementById("responseText").innerHTML += "\n--------------------\n";
@@ -67,12 +80,14 @@ function addGrammarButtonListeners(num) {
             let success = correctGrammarInput(i);
             if (success) {
                 button.remove();
+            } else {
+                alert("ERROR: Couldn't find sentence in input. Please manually correct this sentence.");
             }
         })
     }
 }
 
-// Replace sentence with the grammatically correct sentence
+// Replace sentence in input text with the grammatically correct sentence
 let corrected_text = new Array();
 let replaced_text = new Array();
 function correctGrammarInput(index) {
@@ -82,7 +97,6 @@ function correctGrammarInput(index) {
     let index_quill = quill.getText().indexOf(initialSentence);
 
     if (index_quill === -1) {
-        alert("ERROR: Couldn't find sentence in input. Please manually correct this sentence.");
         return false;
     } else {
         // Delete the initial sentence
@@ -109,6 +123,7 @@ quill.on('selection-change', function (range) {
     }
     });
 
+// Resets stored highlighted text
 function resetHighlight() {
     let text = quill.getText();
     quill.formatText(0, text.length, 'background', '#FFFFFF');
@@ -122,12 +137,9 @@ async function generateGrammarResponse(text) {
 
     let choose_text; 
     // check for user highlighted text
-    if (highlighted_text == null) { 
+    if (highlighted_text == null || text.indexOf(highlighted_text) === -1) { 
         console.log("checking grammar on full text");
         choose_text = text
-    } else if (text.search(highlighted_text) === -1){ 
-        console.log("incorrect highlight - checking grammar on full text");
-        choose_text = text;
     } else {
         console.log("checking grammar on highlighted text");
         choose_text = highlighted_text;
@@ -144,12 +156,13 @@ async function generateGrammarResponse(text) {
     (I have two childs.|I have two children.|The plural form of a child is children.)
     (The other is boy named Thatcher.|The other is a boy named Thatcher.|There needs to be an indefinite article to introduce the noun “boy.”)`
 
+    // Generate response from GPT
     let gptResponse = await gptGenerate(grammarPrompt, user_text);
     if (gptResponse === undefined) {
         // error in gpt response
         return undefined;
     }
-    if (gptResponse.toLowerCase().search("No corrections needed") !== -1) {
+    if (gptResponse.toLowerCase().indexOf("No corrections needed") !== -1) {
         // no grammar corrections needed in input
         return gptResponse;
     }
@@ -171,6 +184,7 @@ async function generateGrammarResponse(text) {
         let initialSentence = parsedResponse[0];
         let correctSentence = parsedResponse[1];
         let reason = parsedResponse[2].trim();
+        // Remove closing paranthesis
         reason = reason.substring(0, reason.length - 1);
 
         if (initialSentence.toLowerCase() === correctSentence.toLowerCase()) {
@@ -178,7 +192,7 @@ async function generateGrammarResponse(text) {
             return;
         }
 
-        if (reason.toLowerCase().search("No corrections needed") !== -1) {
+        if (reason.toLowerCase().indexOf("No corrections needed") !== -1) {
             console.log("Reason states that there are no corrections needed for sentence.")
             return;
         } 
@@ -186,12 +200,12 @@ async function generateGrammarResponse(text) {
         let current_res = "[" + numError + "]\nError: " + initialSentence + "\nCorrection: " + correctSentence + "\nReason: " + reason + "\n";
         let sentenceInd = -1;
         try {
-            sentenceInd = text.search(initialSentence);
+            sentenceInd = text.indexOf(initialSentence);
         } catch(error) {
             console.log("Error in finding initial sentence in input: " + initialSentence);
         }
         if (sentenceInd === -1) {
-            console.log("Cannot find initial sentence in input: " + initialSentence);
+            console.log("Cannot find initial sentence in input.");
             current_res += "**This grammar correction is not highlighted in the input text above**\n";
         } else {
             quill.formatText(sentenceInd, initialSentence.length, 'background', '#3399FF');
@@ -220,6 +234,7 @@ async function generateSynthesizerResponse(text) {
     * [List of key points from body paragraphs used in conclusion]`
     const body = `Body Paragraphs:
     ${text}`
+    // Generate response from GPT
     let res = await gptGenerate(sys, body);
     if (res === undefined) {
         // error in gpt response
@@ -243,22 +258,20 @@ async function generateElaboratorResponse(text) {
 
     let user; 
     // check for user highlighted text
-    if (highlighted_text == null) { 
+    if (highlighted_text == null || text.indexOf(highlighted_text) === -1) { 
         console.log("elaborating on full text");
-        user = `Text: ${text}`;
-    } else if (text.search(highlighted_text) === -1){
-        console.log("error in highlight - elaborating on full text");
         user = `Text: ${text}`;
     } else {
         user = `Text: ${highlighted_text}`;
     }
 
-    // Reformatted to match consistency of other functions
+    // Generate response from GPT
     let res_gpt = await gptGenerate(sys, user);
     if (res_gpt === undefined) {
+        // error in GPT response
         return undefined;
     }
-    if (res_gpt.toLowerCase().search("No elaboration needed") !== -1) {
+    if (res_gpt.toLowerCase().indexOf("No elaboration needed") !== -1) {
         // no elaborations needed in input
         return '';
     }
@@ -268,8 +281,6 @@ async function generateElaboratorResponse(text) {
 
     // Format output for each elaboration found
     responseList.forEach((response) => {
-        // remove closing parenthesis from response
-        response = response.substring(0, response.length - 1);
         let parsedResponse = response.split('|');
         if (parsedResponse.length < 2) {
             console.log("Parsed Response doesn't contain all contents.");
@@ -277,22 +288,23 @@ async function generateElaboratorResponse(text) {
         }
         let initialSentence = parsedResponse[0];
         let reason = parsedResponse[1].trim();
+        // remove closing parenthesis
         reason = reason.substring(0, reason.length - 1);
 
-        if (reason.toLowerCase().search("No elaboration needed.") !== -1) {
-            console.log("Reason states that there are no corrections needed for sentence.")
+        if (reason.toLowerCase().indexOf("No elaboration needed.") !== -1) {
+            console.log("Reason states that there are no elaborations needed for sentence.")
             return;
         }
 
         res += "[" + numError + "]\nTopic: " + initialSentence + "\nReason: " + reason + "\n";
         let sentenceInd = -1;
         try {
-            sentenceInd = text.toLowerCase().search(initialSentence.toLowerCase());
+            sentenceInd = text.toLowerCase().indexOf(initialSentence.toLowerCase());
         } catch(error) {
             console.log("Error in finding initial sentence in input.");
         }
         if (sentenceInd === -1) {
-            console.log("Cannot find initial sentence in input: " + initialSentence.toLowerCase());
+            console.log("Cannot find initial sentence in input.");
             res += "**This topic is not highlighted in the input text above**\n";
         } else {
             quill.formatText(sentenceInd, initialSentence.length, 'background', '#3399FF');
@@ -301,17 +313,6 @@ async function generateElaboratorResponse(text) {
         numError += 1;
     })
     return res;
-}
-
-// Stores user-inputted GPT API key
-function storeGptKey() {
-    var input = document.getElementById("userInput").value;
-    if (input === '') {
-        alert("ERROR: No GPT Key Added in Input.");
-    } else {
-        gptKey = input;
-        alert("Added GPT Key!");
-    }
 }
 
 document.querySelector('#grammarRoverButton').addEventListener('click', async function() {
@@ -324,17 +325,17 @@ document.querySelector('#grammarRoverButton').addEventListener('click', async fu
     }
     let res = await generateGrammarResponse(text);
     if (res === undefined) {
-        setResponse("Failed to receive gpt response. You may need to insert a GPT key.");
+        setResponse("Failed to receive gpt response. You may need to insert a valid GPT key.");
         return;
     }
-    if (res[0].search("No corrections needed") !== -1) {
+    if (res[0].indexOf("No corrections needed") !== -1) {
         setResponse("No corrections needed");
         return;
     }
 
     setResponse('');
 
-    // Iterate through res array, appending each grammar correction to responseText
+    // Iterate through res array, appending each grammar correction to the response textbox
     for (let i = 0; i < res.length; i++) {
         addGrammarCorrection(res[i], i);
     }
@@ -351,7 +352,7 @@ document.querySelector('#synthesizerButton').addEventListener('click', async fun
     }
     let res = await generateSynthesizerResponse(text);
     if (res === undefined) {
-        setResponse("Failed to receive gpt response. You may need to insert a GPT key.");
+        setResponse("Failed to receive gpt response. You may need to insert a valid GPT key.");
         return;
     }
     setResponse(res);
@@ -367,7 +368,7 @@ document.querySelector('#elaboratorButton').addEventListener('click', async func
     }
     let res = await generateElaboratorResponse(text);
     if (res === undefined) {
-        setResponse("Failed to receive gpt response. You may need to insert a GPT key.");
+        setResponse("Failed to receive gpt response. You may need to insert a valid GPT key.");
         return;
     }
     if (res === '') {
