@@ -2,6 +2,12 @@
 
 ## Group Members: Kathy Ning, Microl Chen, Harry Jeon
 
+## Overview
+This Daemon Writing Assistant app is a tool that can modify or provide suggestions for an input text. There are three Daemon writing assistants that can be used, and the Daemons utilize GPT-3.5-turbo for producing its responses: 
+1. GrammarRover: Provides grammar suggestions based on the input text.
+2. Synthesizer: Generates an introduction and conclusion based on the input text.
+3. Elaborator: Offers suggestions on how to elaborate or expand the input text further.
+
 ## Deployed Website: [https://hai-daemon-assistant.vercel.app](https://hai-daemon-assistant.vercel.app)
 
 ## User Trust: [Slide Deck](https://docs.google.com/presentation/d/1sMaC5hp3DbTkcZ3Liu3pyQayfnYOQ5O9yW_cI6c2lKo/edit?usp=sharing)
