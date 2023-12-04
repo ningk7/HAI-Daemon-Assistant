@@ -9,6 +9,7 @@ This Daemon Writing Assistant app is a tool that can modify or provide suggestio
 3. Elaborator: Offers suggestions on how to elaborate or expand the input text further.
 
 ## Deployed Website: [https://hai-daemon-assistant.vercel.app](https://hai-daemon-assistant.vercel.app)
+If the above link doesn't work, try [this link](https://hai-daemon-assistant-kathy-nings-projects.vercel.app/), or [this link](https://hai-daemon-assistant-git-main-kathy-nings-projects.vercel.app/).
 
 ## Project Demo: [https://www.youtube.com/watch?v=YuCfafmIQLQ](https://www.youtube.com/watch?v=YuCfafmIQLQ)
 
