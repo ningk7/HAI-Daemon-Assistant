@@ -1,3 +1,4 @@
+// Add Quill to editor
 var quill = new Quill('#editor', {
     theme: 'snow',
     "modules": {
@@ -6,8 +7,7 @@ var quill = new Quill('#editor', {
 });
 
 let gptKey = "";
-
-// Stores user-inputted GPT API key
+// Stores user-inputted GPT API key in variable gptKey
 function storeGptKey() {
     var input = document.getElementById("userInput").value;
     if (input === '') {
@@ -18,7 +18,14 @@ function storeGptKey() {
     }
 }
 
-// Pass prompt to GPT-3.5 and generate response
+/*
+Pass prompts to GPT-3.5-turbo for Daemons and generate response
+
+@param string systemPrompt - System prompt used in message
+@param string message - User prompt used in message
+
+@returns string response from GPT-3.5-turbo. 
+*/
 const gptGenerate = async(systemPrompt, message)=> {
     try {
       let response = await fetch('https://api.openai.com/v1/chat/completions', {
@@ -43,6 +50,7 @@ const gptGenerate = async(systemPrompt, message)=> {
         return undefined
       }
       const data = await response.json();
+      // return string response
       return data.choices[0].message.content;
     } catch (error) {
         console.log("Error in GPT call: " + error)
@@ -50,16 +58,21 @@ const gptGenerate = async(systemPrompt, message)=> {
     }
   }
 
-// Replace response text
+// Replace text in responseText with given string res
 function setResponse(res) {
   document.getElementById("responseText").innerHTML = res;
 }
 
-// Add each grammar correction to response box
+/* 
+Add each grammar correction to response
+
+@param string text - grammar correction for user inputted text
+@param int index - index of grammar correction in list
+*/
 function addGrammarCorrection(text, index) {
     document.getElementById("responseText").innerHTML += text;
 
-    // Only add correction button if can find initial text in input
+    // Only add button for user to add corrections if can find initial text in input
     if (text.indexOf("**This grammar correction is not highlighted in the input text above**") === -1) {
         const button = document.createElement('button')
         button.innerText = 'Add Correction ' + (index+1)
@@ -68,7 +81,6 @@ function addGrammarCorrection(text, index) {
         document.getElementById("responseText").appendChild(button)
     }
 
-    // Add spacer between responses
     document.getElementById("responseText").innerHTML += "\n--------------------\n";
 }
 
@@ -87,7 +99,11 @@ function addGrammarButtonListeners(num) {
     }
 }
 
-// Replace sentence in input text with the grammatically correct sentence
+/* 
+Replace sentence in input text with the grammatically correct sentence
+
+@param int index - index of grammar correction in list
+*/
 let corrected_text = new Array();
 let replaced_text = new Array();
 function correctGrammarInput(index) {
@@ -115,6 +131,7 @@ let end_index;
 
 quill.on('selection-change', function (range) {
     if (range && range.length > 0) {
+        // Store highlighted text
         highlighted_text = quill.getText(range.index, range.length);
         end_index_ht = range.index + range.length;
     } else {
@@ -129,7 +146,11 @@ function resetHighlight() {
     quill.formatText(0, text.length, 'background', '#FFFFFF');
 }
 
-// Finds grammar errors in user-inputted text and outputs fixes
+/*
+Finds grammar errors in user-inputted text and outputs fixes
+
+@param string text - user inputted text
+*/
 async function generateGrammarResponse(text) {
 
     corrected_text = [];
@@ -197,6 +218,7 @@ async function generateGrammarResponse(text) {
             return;
         } 
 
+        // Format response
         let current_res = "[" + numError + "]\nError: " + initialSentence + "\nCorrection: " + correctSentence + "\nReason: " + reason + "\n";
         let sentenceInd = -1;
         try {
@@ -208,11 +230,13 @@ async function generateGrammarResponse(text) {
             console.log("Cannot find initial sentence in input.");
             current_res += "**This grammar correction is not highlighted in the input text above**\n";
         } else {
+            // Highlight sentence that needs grammar correction
             quill.formatText(sentenceInd, initialSentence.length, 'background', '#3399FF');
         }
 
         corrected_text.push(initialSentence);
         replaced_text.push(correctSentence);
+        // Add grammar correction to list
         res.push(current_res);
         numError += 1;
   })
@@ -223,7 +247,11 @@ async function generateGrammarResponse(text) {
   return res;
 }
 
-// Generates introduction and conclusion paragraphs based on given text.
+/*
+Generates introduction and conclusion paragraphs based on given text. Also lists key points used in the introduction and conclusion.
+
+@param string text - user inputted text
+*/
 async function generateSynthesizerResponse(text) {
     const sys = `I want you to act as an editor. Given the body paragraphs below, first write me a short introduction paragraph with a strong and detailed thesis statement. Then write me a short conclusion paragraph. For both the introduction and conclusion paragraphs, give me a list of key points you used from the body paragraphs. Respond in the format:
     Introduction: 
@@ -243,7 +271,11 @@ async function generateSynthesizerResponse(text) {
     return res;
 }
 
-// Finds areas that can be elaborated on in the user-inputted text
+/* 
+Finds areas that can be elaborated on in the user-inputted text
+
+@param string text - user inputted text
+*/
 async function generateElaboratorResponse(text) {
     let sys = `I want you to act as a proofreader and give me writing advice. Given this body of text, first understand the main idea of the text. Then, return a list of items (up to 5 at max) that could be further expanded on to support the text's main idea and give reasoning to explain why. Only output the list of entries, each entry should be in the format (text|reason). Make sure that 'text' is a string within the given body of text. If there is no elaboration needed, then return "No elaboration needed."
     Example 1:
@@ -296,6 +328,7 @@ async function generateElaboratorResponse(text) {
             return;
         }
 
+        // Format response
         res += "[" + numError + "]\nTopic: " + initialSentence + "\nReason: " + reason + "\n";
         let sentenceInd = -1;
         try {
@@ -307,6 +340,7 @@ async function generateElaboratorResponse(text) {
             console.log("Cannot find initial sentence in input.");
             res += "**This topic is not highlighted in the input text above**\n";
         } else {
+            // Highlight sentence that needs grammar correction
             quill.formatText(sentenceInd, initialSentence.length, 'background', '#3399FF');
         }
         res += "--------------------\n";
@@ -315,6 +349,7 @@ async function generateElaboratorResponse(text) {
     return res;
 }
 
+// Call generateGrammarResponse(text) when user clicks grammarRoverButton
 document.querySelector('#grammarRoverButton').addEventListener('click', async function() {
     setResponse("Loading..."); // let user know that GPT is running
     resetHighlight();
@@ -342,6 +377,7 @@ document.querySelector('#grammarRoverButton').addEventListener('click', async fu
     addGrammarButtonListeners(res.length);
 });
 
+// Call generateSynthesizerResponse(text) when user clicks synthesizerButton
 document.querySelector('#synthesizerButton').addEventListener('click', async function() {
     setResponse("Loading..."); // let user know that GPT is running
     resetHighlight();
@@ -358,6 +394,7 @@ document.querySelector('#synthesizerButton').addEventListener('click', async fun
     setResponse(res);
 });
 
+// Call generateElaboratorResponse(text) when user clicks elaboratorButton
 document.querySelector('#elaboratorButton').addEventListener('click', async function() {
     setResponse("Loading..."); // let user know that GPT is running
     resetHighlight();
